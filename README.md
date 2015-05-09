@@ -1,4 +1,4 @@
-Kubernetes with Percona XtraDB Cluster (PXC)
+Kubernetes with Percona XtraDB Cluster (PXC) on Google Cloud Engine (GCE)
 ================
 
 ## Introduction
@@ -17,7 +17,7 @@ The script assumes that you have GCE setup correctly. Refer to [https://cloud.go
 
 Also, Kubernetes documentation [here](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs) is a valuable resource.
 
-Make sure Google cloud SDK is installed.
+Make sure Google cloud SDK is installed for gcloud and other CLI utils.
 
 
 ## Model
