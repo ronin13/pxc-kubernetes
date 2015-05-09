@@ -5,19 +5,23 @@ Kubernetes with Percona XtraDB Cluster (PXC) on Google Cloud Engine (GCE)
 
 This repository contains files to spawn a PXC cluster onto Google Cloud Engine (GCE).
 
-The script spawn-node is idempotent in nature, you can run it as many times as you need nodes in cluster without worrying about anything else. 
+## How it runs
 
-Multiple invocations of the script will either bootstrap a new cluster or add new nodes to cluster.
+* The script spawn-node is idempotent in nature, you can run it as many times as you need nodes in cluster without worrying about anything else. 
 
-Also, a Kubernetes cluster ```Service``` is spawned.
+* Multiple invocations of the script will either bootstrap a new cluster or add new nodes to cluster through addition of new ```Pods```.
 
-The script assumes that you have GCE setup correctly. Refer to [https://cloud.google.com/container-engine/docs/before-you-begin](https://cloud.google.com/container-engine/docs/before-you-begin) for more.
+* Also, a Kubernetes cluster ```Service``` is spawned.
 
-[https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file](https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file) for more details on configuration.
+## Setup
 
-Also, Kubernetes documentation [here](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs) is a valuable resource.
+* The script assumes that you have GCE setup correctly. Refer to [https://cloud.google.com/container-engine/docs/before-you-begin](https://cloud.google.com/container-engine/docs/before-you-begin) for more.
 
-Make sure Google cloud SDK is installed for gcloud and other CLI utils. Also, make sure to spawn a resonably large instance of GCE since memory is often consumed by other instances/services (DNS etc), so memory available for mysqld will be less. I have tested with n1-standard-1  instance.
+* [https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file](https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file) for more details on configuration.
+
+* Also, Kubernetes documentation [here](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs) is a valuable resource. Make sure to understand concept of ```Pods``, ```Services``` and others as described [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/user-guide.md).
+
+* Make sure Google cloud SDK is installed for gcloud and other CLI utils. Also, make sure to spawn a resonably large instance of GCE since memory is often consumed by other instances/services (DNS etc), so memory available for mysqld will be less. I have tested with n1-standard-1  instance.
 
 
 ## Model
@@ -33,7 +37,7 @@ Make sure Google cloud SDK is installed for gcloud and other CLI utils. Also, ma
 
 ## Docker Image
 
-The Docker image used is [https://registry.hub.docker.com/u/ronin/pxc/](https://registry.hub.docker.com/u/ronin/pxc/) with centos7 tag. This images installs a centos7 release build (may not be latest, yet, since there are no automated builds) of PXC.
+* The Docker image used is [https://registry.hub.docker.com/u/ronin/pxc/](https://registry.hub.docker.com/u/ronin/pxc/) with centos7 tag. This images installs a centos7 release build (may not be latest, yet, since there are no automated builds) of PXC.
 
 ## Future Work
 
