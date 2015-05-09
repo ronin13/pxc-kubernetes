@@ -17,6 +17,8 @@ The script assumes that you have GCE setup correctly. Refer to [https://cloud.go
 
 Also, Kubernetes documentation [here](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs) is a valuable resource.
 
+Make sure Google cloud SDK is installed.
+
 
 ## Model
 
