@@ -44,3 +44,64 @@ This repository contains files to spawn a PXC cluster onto Google Cloud Engine (
 * Addition of others into PXC pod - a haproxy or a xinetd check perhaps.
 
 * Allow for volumes and environment for further user customization.
+
+## Example
+```bash
+
+
+bash -x ./spawn.sh
++ trap cleanup EXIT
++ gcloud alpha container kubectl get services -l type=cluster
++ grep -q cluster
+++ gcloud alpha container kubectl get pods -l name=pxc
+++ wc -l
++ count=2
++ count=0
++ nodecnt=0
++ [[ 0 -eq 0 ]]
++ bstrap='"--wsrep-new-cluster",'
++ joiner=
++ source template
++ gcloud alpha container kubectl create -f -
++ tee -a /tmp/log
+++ cat
+pods/node0
+
++ cleanup
++ local estatus=0
++ [[ 0 -ne 0 ]]
+                                                                                                                                                                                                                                  (google-cloud/eternal-autumn-94011)~21:58-0
+>>        gcloud alpha container kubectl get pods -l 'name=pxc'
+POD       IP            CONTAINER(S)   IMAGE(S)            HOST                                      LABELS     STATUS    CREATED
+node0     10.140.1.19   node0          ronin/pxc:centos7   k8s-galera-cluster-node-1/104.197.66.82   name=pxc   Running   Less than a second
+
+
+
+./spawn.sh
++ trap cleanup EXIT
++ gcloud alpha container kubectl get services -l type=cluster
++ grep -q cluster
+++ gcloud alpha container kubectl get pods -l name=pxc
+++ wc -l
++ count=3
++ count=1
++ nodecnt=1
++ [[ 1 -eq 0 ]]
++ bstrap=
++ joiner=cluster
++ source template
++ gcloud alpha container kubectl create -f -
+++ cat
++ tee -a /tmp/log
+pods/node1
+
++ cleanup
++ local estatus=0
++ [[ 0 -ne 0 ]]
++ gcloud alpha container kubectl get pods -l name=pxc
+POD       IP            CONTAINER(S)   IMAGE(S)            HOST                                      LABELS     STATUS    CREATED
+node0     10.140.1.19   node0          ronin/pxc:centos7   k8s-galera-cluster-node-1/104.197.66.82   name=pxc   Running   Less than a second
+node1     10.140.1.20   node1          ronin/pxc:centos7   k8s-galera-cluster-node-1/104.197.66.82   name=pxc   Running   Less than a second
+
+
+```
