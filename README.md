@@ -19,7 +19,7 @@ This repository contains files to spawn a PXC cluster onto Google Cloud Engine (
 
 * [https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file](https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file) for more details on configuration.
 
-* Also, Kubernetes documentation [here](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs) is a valuable resource. Make sure to understand concept of ```Pods``, ```Services``` and others as described [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/user-guide.md).
+* Also, Kubernetes documentation [here](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/docs) is a valuable resource. Make sure to understand concept of ```Pods```, ```Services``` and others as described [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/user-guide.md).
 
 * Make sure Google cloud SDK is installed for gcloud and other CLI utils. Also, make sure to spawn a resonably large instance of GCE since memory is often consumed by other instances/services (DNS etc), so memory available for mysqld will be less. I have tested with n1-standard-1  instance.
 
