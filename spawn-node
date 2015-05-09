@@ -1,0 +1,41 @@
+#!/bin/bash 
+
+cleanup() {
+    local estatus=$?
+    if [[ $estatus -ne 0 ]];then 
+        echo "Unexpected failure, stopping all nodes"
+        gcloud alpha container kubectl stop -f cluster.json
+        gcloud alpha container kubectl stop pods -l 'name=pxc'
+        exit 1
+    else
+        echo "PXC nodes running at the moment"
+        gcloud alpha container kubectl get pods -l 'name=pxc'
+    fi 
+}
+
+trap cleanup EXIT
+
+if ! gcloud alpha container kubectl get services  -l 'type=cluster' | grep -q cluster; then
+    echo "Starting the cluster Service"
+    gcloud alpha container kubectl create -f cluster.json
+fi
+
+count=$(gcloud alpha container kubectl get pods -l 'name=pxc' | wc -l)
+count=$(( count-2 ))
+nodecnt=$count 
+
+
+if [[ $nodecnt -eq 0 ]] ; then
+    echo "Bootstrapping the node"
+    bstrap='"--wsrep-new-cluster",'
+    joiner=""
+else 
+    echo "Starting node# $nodecnt to join the mighty cluster"
+    bstrap=""
+    joiner="cluster"
+fi
+
+
+source template.node | gcloud alpha container kubectl create -f - 
+
+

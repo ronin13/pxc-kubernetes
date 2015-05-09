@@ -1,0 +1,22 @@
+cat <<EOF
+{
+"id": "node${nodecnt}",
+"kind": "Pod",
+"apiVersion": "v1beta1",
+"desiredState": {
+  "manifest": {
+    "version": "v1beta1",
+    "id": "node${nodecnt}",
+    "containers": [{
+      "name": "node${nodecnt}",
+      "image": "ronin/pxc:centos7",
+      "ports": [{ "containerPort": 3306 }, {"containerPort": 4567 }, {"containerPort": 4568 } ],
+      "command": ["/usr/sbin/mysqld",  "--basedir=/usr",  "--wsrep-node-name=node${nodecnt}",   "--user=mysql", $bstrap "--skip-grant-tables", "--wsrep_cluster_address=gcomm://$joiner", "--wsrep-sst-method=rsync"]
+    }]
+  }
+},
+"labels": { 
+    "name": "pxc"
+  }
+}
+EOF

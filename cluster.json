@@ -1,0 +1,35 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1beta3",
+    "metadata": {
+        "name": "cluster",
+        "labels": {
+            "type": "cluster"
+        }
+    },
+    "spec": {
+        "selector": {
+            "name": "pxc"
+        },
+        "ports": [
+            {
+                "name": "client",
+                "protocol": "TCP",
+                "port": 3306,
+                "targetPort": 3306
+            },
+            {
+                "name": "wsrep1",
+                "protocol": "TCP",
+                "port": 4567,
+                "targetPort": 4567
+            },
+            {
+                "name": "wsrep2",
+                "protocol": "TCP",
+                "port": 4568,
+                "targetPort": 4568
+            }
+        ]
+    }
+}
