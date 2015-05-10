@@ -34,6 +34,15 @@ This repository contains files to spawn a PXC cluster onto Google Cloud Engine (
 
 * They communicate through the cluster ```Service```. In other words, the gcomm url is ```gcomm://cluster``` which points to the endpoint of cluster ```Service``` and not bootstrapped node's IP Address. This address agnostic approach is useful in many ways and makes it easy to scale.
 
+## Networking
+
+* There is no Docker-like linking done here, though there seems to be a syntactical support for it.
+
+* Instead, ```Service``` endpoints are used for communication among ```Pods```. Note that each node is in a ```Pod``` of its own.
+
+* In a cluster, each node is both a client and a server to this ```Service``` and its endpoint.
+
+* Using a Service also provides for load-balancing among the nodes of cluster.
 
 ## Docker Image
 
@@ -44,6 +53,10 @@ This repository contains files to spawn a PXC cluster onto Google Cloud Engine (
 * Addition of others into PXC pod - a haproxy or a xinetd check perhaps.
 
 * Allow for volumes and environment for further user customization.
+
+* Replication controllers. 
+
+* Tests along lines of [capem](https://github.com/ronin13/capem).
 
 ## Example
 ```bash
