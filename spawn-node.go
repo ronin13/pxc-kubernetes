@@ -22,6 +22,8 @@ type nodeConfig struct {
 var nd nodeConfig
 var (
 	createCluster bool
+	deleteCluster bool
+	runNode       bool
 	zone          string
 	clusterName   string
 )
@@ -56,6 +58,7 @@ func runWithMsg(cmd string, msg string) string {
 
 	cmnd := exec.Command("sh", "-c", cmd)
 	cmnd.Stderr = os.Stderr
+	//cmnd.Stdin = os.Stdin
 	if rval, err = cmnd.Output(); err != nil {
 		if len(msg) > 0 {
 			log.Panicf(fmt.Sprintf("Message %s, Error %s, Command %s", msg, err, cmd))
@@ -81,6 +84,8 @@ func parseFlags() {
 	flag.BoolVar(&createCluster, "create", false, "Create cluster")
 	flag.StringVar(&clusterName, "name", "pxc-cluster", "Name of cluster")
 	flag.StringVar(&zone, "zone", "us-central1-a", "Cluster zone")
+	flag.BoolVar(&deleteCluster, "delete", false, "Delete cluster")
+	flag.BoolVar(&runNode, "run", true, "To start a node after cluster is created")
 }
 
 func cleanUp() {
@@ -101,11 +106,21 @@ func main() {
 	parseFlags()
 	flag.Parse()
 
+	if deleteCluster {
+		log.Printf("Deleting cluster %s in zone %s", clusterName, zone)
+		clusterCmd := fmt.Sprintf("gcloud alpha container clusters delete %s --zone %s", clusterName, zone)
+		fmt.Println(runWithMsg(clusterCmd, "Failed to delete cluster"))
+		os.Exit(0)
+	}
+
 	if createCluster {
 		log.Printf("Creating cluster %s in zone %s", clusterName, zone)
 		clusterCmd := fmt.Sprintf("gcloud alpha container clusters create %s --zone %s", clusterName, zone)
 		fmt.Println(runWithMsg(clusterCmd, "Failed to create cluster"))
 		runWithMsg(fmt.Sprintf("gcloud config set container/cluster %s", clusterName), "Failed to set cluster config")
+		if !runNode {
+			os.Exit(0)
+		}
 		time.Sleep(time.Second * 2)
 	}
 
