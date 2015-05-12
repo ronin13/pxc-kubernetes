@@ -7,7 +7,7 @@ This repository contains files to spawn a PXC cluster onto Google Cloud Engine (
 
 ## How it runs
 
-* The script spawn-node is idempotent in nature, you can run it as many times as you need nodes in cluster without worrying about anything else. 
+* The script kubecluster is idempotent in nature, you can run it as many times as you need nodes in cluster without worrying about anything else. 
 
 * Multiple invocations of the script will either bootstrap a new cluster or add new nodes to cluster through addition of new ```Pods```.
 
