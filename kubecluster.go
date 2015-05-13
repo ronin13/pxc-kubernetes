@@ -19,13 +19,15 @@ type nodeConfig struct {
 	NodeCount int
 }
 
-var nd nodeConfig
 var (
 	createCluster bool
 	deleteCluster bool
 	runNode       bool
 	zone          string
 	clusterName   string
+	projectID     string
+	nd            nodeConfig
+	stopNode      string
 )
 
 const nodeTempl = `
@@ -46,7 +48,7 @@ const nodeTempl = `
   }
 },
 "labels": { 
-    "name": "pxc"
+    "name": "pxc", "node": "node{{.NodeCount}}"
   }
 }
 `
@@ -71,11 +73,11 @@ func getCount() int {
 	var cnt int
 	var err error
 
-	str := strings.Replace(runWithMsg("gcloud alpha container kubectl get pods  -l 'name=pxc' | wc -l", "gcloud invocation failed"), "\n", "", -1)
+	str := strings.Replace(runWithMsg("kubectl get pods --no-headers=true  -l 'name=pxc' | wc -l", "gcloud invocation failed"), "\n", "", -1)
 	if cnt, err = strconv.Atoi(str); err != nil {
 		log.Panicf("Failed to get count due to %s", err)
 	}
-	cnt = cnt - 2
+	cnt = cnt / 2
 	log.Printf("%d nodes are up", cnt)
 	return cnt
 }
@@ -85,16 +87,18 @@ func parseFlags() {
 	flag.StringVar(&clusterName, "name", "pxc-cluster", "Name of cluster")
 	flag.StringVar(&zone, "zone", "us-central1-a", "Cluster zone")
 	flag.BoolVar(&deleteCluster, "delete", false, "Delete cluster")
-	flag.BoolVar(&runNode, "run", true, "To start a node after cluster is created")
+	flag.BoolVar(&runNode, "start", false, "To start a node in the cluster")
+	flag.StringVar(&stopNode, "stop", "", "Node to stop in cluster")
+	flag.StringVar(&projectID, "project", "", "Project Id on GCE")
 }
 
 func cleanUp() {
 	if err := recover(); err != nil {
-		runWithMsg("gcloud alpha container kubectl stop -f cluster.json", "Failed to stop service")
-		runWithMsg("gcloud alpha container kubectl stop pods -l 'name=pxc'", "Failed to stop pods")
+		runWithMsg("kubectl stop -f cluster.json", "Failed to stop service")
+		runWithMsg("kubectl stop pods -l 'name=pxc'", "Failed to stop pods")
 		os.Exit(1)
 	}
-	log.Printf(runWithMsg("gcloud alpha container kubectl get pods -l 'name=pxc'", "Failed to get pods"))
+	log.Printf(runWithMsg("kubectl get pods -l 'name=pxc'", "Failed to get pods"))
 }
 
 func main() {
@@ -103,33 +107,47 @@ func main() {
 
 	log.Println("Lets begin")
 
+	log.Println("Make sure you are running >= 2015.05.12 of gcloud and compute")
+
 	parseFlags()
 	flag.Parse()
 
+	if projectID == "" {
+		log.Fatalf("ProjectId is required: --project")
+	}
+
+	if stopNode != "" {
+		clusterCmd := fmt.Sprintf("kubectl stop pods %s", stopNode)
+		log.Println(runWithMsg(clusterCmd, "Failed to stop node"))
+		os.Exit(0)
+	}
+
 	if deleteCluster {
 		log.Printf("Deleting cluster %s in zone %s", clusterName, zone)
-		clusterCmd := fmt.Sprintf("gcloud alpha container clusters delete %s --zone %s", clusterName, zone)
-		fmt.Println(runWithMsg(clusterCmd, "Failed to delete cluster"))
+		clusterCmd := fmt.Sprintf("gcloud alpha container clusters delete %s --zone %s --quiet", clusterName, zone)
+		log.Println(runWithMsg(clusterCmd, "Failed to delete cluster"))
 		os.Exit(0)
 	}
 
 	if createCluster {
 		log.Printf("Creating cluster %s in zone %s", clusterName, zone)
 		clusterCmd := fmt.Sprintf("gcloud alpha container clusters create %s --zone %s", clusterName, zone)
-		fmt.Println(runWithMsg(clusterCmd, "Failed to create cluster"))
+		log.Println(runWithMsg(clusterCmd, "Failed to create cluster"))
 		runWithMsg(fmt.Sprintf("gcloud config set container/cluster %s", clusterName), "Failed to set cluster config")
+		runWithMsg(fmt.Sprintf("kubectl config use-context gke_%s_%s_%s", projectID, zone, clusterName), "Failed to set kubectl config")
+		runWithMsg(fmt.Sprintf("gcloud alpha container clusters describe %s", clusterName), "Failed to get cluster config")
 		if !runNode {
 			os.Exit(0)
 		}
 		time.Sleep(time.Second * 2)
 	}
 
-	check := runWithMsg("gcloud alpha container kubectl get services  -l 'type=cluster'", "gcloud invocation failed")
+	check := runWithMsg("kubectl get services  -l 'type=cluster'", "gcloud invocation failed")
 
 	if !strings.Contains(check, "cluster") {
 		log.Println("Starting the cluster service")
-		runWithMsg("gcloud alpha container kubectl create -f cluster.json", "Failed to spawn cluster service")
-		runWithMsg("gcloud alpha container kubectl get services -l 'type=cluster'", "Failed to get services")
+		runWithMsg("kubectl create -f cluster.json", "Failed to spawn cluster service")
+		runWithMsg("kubectl get services -l 'type=cluster'", "Failed to get services")
 	}
 
 	defer cleanUp()
@@ -144,7 +162,7 @@ func main() {
 
 	t := template.Must(template.New("nodeParser").Parse(nodeTempl))
 
-	cmd := exec.Command("sh", "-c", "gcloud alpha container kubectl create -f -")
+	cmd := exec.Command("sh", "-c", "kubectl create -f -")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
