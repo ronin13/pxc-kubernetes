@@ -15,6 +15,8 @@ This repository contains files to spawn a PXC cluster onto Google Cloud Engine (
 
 ## Setup
 
+* Make sure to install the latest Google Cloud SDK. The latest at this time is [0.9.60](https://gist.github.com/61b2f6cb8aefdf31dbee).
+
 * The script assumes that you have GCE setup correctly. Refer to [https://cloud.google.com/container-engine/docs/before-you-begin](https://cloud.google.com/container-engine/docs/before-you-begin) for more.
 
 * [https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file](https://cloud.google.com/container-engine/docs/pods/operations#pod_configuration_file) for more details on configuration.
@@ -57,3 +59,65 @@ This repository contains files to spawn a PXC cluster onto Google Cloud Engine (
 * Replication controllers. 
 
 * Tests along lines of [capem](https://github.com/ronin13/capem).
+
+## Example 
+
+### Creating cluster
+```bash
+
+            go run kubecluster.go -create -name=testx --project=eternal-autumn-94011
+            2015/05/13 23:47:22 Lets begin
+            2015/05/13 23:47:22 Creating cluster testx in zone us-central1-a
+            2015/05/13 23:47:22 Running gcloud alpha container clusters create testx --zone us-central1-a
+            Creating cluster testx...done.
+            Created [https://www.googleapis.com/container/v1beta1/projects/eternal-autumn-94011/zones/us-central1-a/clusters/testx].
+            Warning: Permanently added '146.148.81.41' (ECDSA) to the list of known hosts.
+            kubeconfig entry generated for testx. To switch context to the cluster, run
+
+            $ kubectl config use-context gke_eternal-autumn-94011_us-central1-a_testx
+
+            2015/05/13 23:51:20 Using gcloud compute copy-files to fetch ssl certs from cluster master...
+            NAME   ZONE           CLUSTER_API_VERSION  MASTER_IP      MACHINE_TYPE                           NODES  STATUS
+            testx  us-central1-a  0.17.0               146.148.81.41  n1-standard-1, container-vm-v20150505  3      running
+
+            2015/05/13 23:51:20 Running gcloud config set container/cluster testx
+            2015/05/13 23:51:21 Running kubectl config use-context gke_eternal-autumn-94011_us-central1-a_testx
+            2015/05/13 23:51:21 Running gcloud alpha container clusters describe testx
+```
+
+### Starting a node
+```bash
+            go run kubecluster.go    --project=eternal-autumn-94011 -start
+            2015/05/14 00:05:41 Lets begin
+            2015/05/14 00:05:41 Running kubectl get services  -l 'type=cluster'
+            2015/05/14 00:05:43 Running kubectl get pods --no-headers=true  -l 'name=pxc' | wc -l
+            2015/05/14 00:05:44 0 nodes are up
+            2015/05/14 00:05:44 Starting node0 with following configuration
+
+            {
+            "id": "node0",
+            "kind": "Pod",
+            "apiVersion": "v1beta1",
+            "desiredState": {
+            "manifest": {
+                "version": "v1beta1",
+                "id": "node0",
+                "containers": [{
+                "name": "node0",
+                "image": "ronin/pxc:centos7-release",
+                "ports": [{ "containerPort": 3306 }, {"containerPort": 4567 }, {"containerPort": 4568 } ],
+                "command": ["/usr/sbin/mysqld",  "--basedir=/usr",  "--wsrep-node-name=node0",   "--user=mysql", "--wsrep-new-cluster",  "--skip-grant-tables", "--wsrep_cluster_address=gcomm://", "--wsrep-sst-method=rsync"]
+                }]
+            }
+            },
+            "labels": {
+                "name": "pxc"
+            }
+            }
+            pods/node0
+            2015/05/14 00:05:50 Successfully started node0
+            2015/05/14 00:05:50 Running kubectl get pods -l 'name=pxc'
+            2015/05/14 00:05:51 POD       IP        CONTAINER(S)   IMAGE(S)                    HOST                LABELS     STATUS    CREATED     MESSAGE
+            node0                                                          k8s-testx-node-1/   name=pxc   Pending   4 seconds
+                                node0          ronin/pxc:centos7-release
+```
