@@ -39,7 +39,7 @@ const nodeTempl = `
     "id": "node{{.NodeCount}}",
     "containers": [{
       "name": "node{{.NodeCount}}",
-      "image": "ronin/pxc:centos7",
+      "image": "ronin/pxc:centos7-release",
       "ports": [{ "containerPort": 3306 }, {"containerPort": 4567 }, {"containerPort": 4568 } ],
       "command": ["/usr/sbin/mysqld",  "--basedir=/usr",  "--wsrep-node-name=node{{.NodeCount}}",   "--user=mysql", {{.Bstrap}}  "--skip-grant-tables", "--wsrep_cluster_address=gcomm://{{.Joiner}}", "--wsrep-sst-method=rsync"]
     }]
