@@ -121,3 +121,7 @@ pods/node0
 node0                                                          k8s-testx-node-1/   name=pxc   Pending   4 seconds
                     node0          ronin/pxc:centos7-release
 ```
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ronin13/pxc-kubernetes/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
